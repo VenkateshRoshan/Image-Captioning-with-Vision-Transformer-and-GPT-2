@@ -1,52 +1,59 @@
-import numpy as np
 import os
-import cv2
+import pandas as pd
 from PIL import Image
 from torchvision import transforms
-import pandas as pd
+from torch.utils.data import Dataset
 
-class dataLoader:
-    def __init__(self, path):
-        self.path = path
-        self.img_path = path + 'images/'
-        self.caption_path = path + 'captions.csv'
-        self.img_list = os.listdir(self.img_path)
-        self.caption_dict = self.get_caption_dict()
-        self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor()
+class ImageCaptionDataset(Dataset):
+    """
+    Custom PyTorch Dataset class to handle loading and transforming image-caption pairs
+    where image paths and captions are provided in a CSV file.
+    
+    Attributes:
+        caption_file (str): Path to the CSV file containing image paths and captions.
+        transform (torchvision.transforms.Compose): Transformations to apply on the images.
+    """
+
+    def __init__(self, caption_file: str, file_path: str, transform=None):
+        """
+        Initialize dataset with caption CSV file and optional transform.
+        
+        Args:
+            caption_file (str): Path to the CSV file where each row has an image path and caption.
+            transform (callable, optional): Optional transform to apply on an image.
+        """
+        self.df = pd.read_csv(caption_file)
+        self.image_path = file_path
+        self.transform = transform or transforms.Compose([
+            transforms.Resize((224, 224)),   # Resize to 224x224 for ViT
+            transforms.ToTensor(),           # Convert to tensor
+            # Normalize to have values in the range [0, 1]
+            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-    def get_caption_dict(self):
-        caption_dict = {}
-        df = pd.read_csv(self.caption_path, delimiter=',')
-        for i in range(len(df)):
-            img_name = df.iloc[i, 0]
-            caption = df.iloc[i, 1]
-            caption_dict[img_name] = caption
-        return caption_dict
-    
-    def get_image(self, img_name):
-        img = Image.open(self.img_path + img_name)
-        img = self.transform(img)
-        return img
-    
-    def get_caption(self, img_name):
-        return self.caption_dict[img_name]
-    
-    def get_batch(self, batch_size):
-        batch = np.random.choice(self.img_list, batch_size)
-        images = []
-        captions = []
-        for img_name in batch:
-            images.append(self.get_image(img_name))
-            captions.append(self.get_caption(img_name))
-        return images, captions
-    
-    def get_all(self):
-        images = []
-        captions = []
-        for img_name in self.img_list:
-            images.append(self.get_image(img_name))
-            captions.append(self.get_caption(img_name))
-        return images, captions
+    def __len__(self):
+        """
+        Return the total number of samples in the dataset.
+        """
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        """
+        Retrieve an image and its corresponding caption by index.
+
+        Args:
+            idx (int): Index of the data item.
+
+        Returns:
+            tuple: (image, caption) where image is the transformed image tensor and caption is the associated text.
+        """
+        img_path = self.df.iloc[idx, 0]  # The first column contains image paths
+        caption = self.df.iloc[idx, 1]   # The second column contains captions
+        # Load image
+        image = Image.open(self.image_path+img_path).convert('RGB')
+
+        # Apply transformations to the image
+        if self.transform:
+            image = self.transform(image)
+
+        return image, caption

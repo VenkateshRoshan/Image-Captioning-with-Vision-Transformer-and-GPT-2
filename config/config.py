@@ -9,3 +9,4 @@ class Config:
     DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
     AWS_S3_BUCKET = 'your-s3-bucket-name'
     DATASET_PATH = '../Datasets/Flickr8K/'
+    BATCH_SIZE = 32
