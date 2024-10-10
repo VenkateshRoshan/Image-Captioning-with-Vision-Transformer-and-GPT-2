@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from PIL import Image
 import io
 from infer import ImageCaptioningInference
@@ -23,7 +23,8 @@ inference_model = ImageCaptioningInference(model)
 
 @app.route('/')
 def home():
-    return "Welcome to the Flask API"
+    # return "Welcome to the Flask API"
+    return render_template('index.html')
 
 @app.route('/upload-image', methods=['POST'])
 def upload_image():
