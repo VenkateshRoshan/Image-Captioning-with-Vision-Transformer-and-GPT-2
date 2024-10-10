@@ -7,11 +7,21 @@ from data.dataLoader import ImageCaptionDataset
 from config.config import Config
 from models.model import ImageCaptioningModel
 
-from torchsummary import summary
+import mlflow
+import mlflow.pytorch
 
+# TODO : Implementing Weights and Biases to for project tracking and evaluation and TODO : DVC also for data versioning
 
 
 def train_model(model,dataLoader, optimizer, loss_fn):
+
+    with mlflow.start_run():
+        mlflow.log_params({
+            "epochs": Config.EPOCHS,
+            "batch_size": Config.BATCH_SIZE,
+            "learning_rate": Config.LEARNING_RATE,
+            "device": Config.DEVICE
+        })
 
     model.gpt2_model.train()
     for epoch in range(Config.EPOCHS):
@@ -41,10 +51,14 @@ def train_model(model,dataLoader, optimizer, loss_fn):
 
             epoch_loss += loss.item()
 
-        print(f'Epoch {epoch + 1}, Loss: {epoch_loss:.4f}')
+        print(f'Epoch {epoch + 1}, Loss: {epoch_loss/len(dataLoader):.4f}')
+        mlflow.log_metric('loss', epoch_loss/len(dataLoader), step=epoch)
 
     # Save the model    
     model.save('model')
+    # save the artifacts
+    mlflow.log_artifacts('model')
+    mlflow.pytorch.log_model(model.gpt2_model, "models")
 
     # return model
 
@@ -75,4 +89,5 @@ if __name__ == '__main__':
     model = ImageCaptioningModel()
     optimizer = torch.optim.Adam(model.gpt2_model.parameters(), lr=Config.LEARNING_RATE)
     loss_fn = torch.nn.CrossEntropyLoss()
+    mlflow.set_experiment('ImageCaptioning')
     train_model(model, dataloader, optimizer, loss_fn)
