@@ -1,0 +1,7 @@
+numpy
+PILLOW
+transformers
+mlflow
+pandas
+torchvision
+flask

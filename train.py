@@ -12,7 +12,6 @@ import mlflow.pytorch
 
 # TODO : Implementing Weights and Biases to for project tracking and evaluation and TODO : DVC also for data versioning
 
-
 def train_model(model,dataLoader, optimizer, loss_fn):
 
     with mlflow.start_run():
@@ -24,7 +23,8 @@ def train_model(model,dataLoader, optimizer, loss_fn):
         })
 
     model.gpt2_model.train()
-    for epoch in range(Config.EPOCHS):
+    for epoch in tqdm(range(Config.EPOCHS)):
+        print(f'Epoch {epoch + 1}/{Config.EPOCHS}')
         epoch_loss = 0
         for batch_idx, (images, captions) in tqdm(enumerate(dataLoader)):
             print(f'\rBatch {batch_idx + 1}/{len(dataLoader)} , Loss : {epoch_loss/(batch_idx+1):.4f}\t', end='')

@@ -1,7 +1,6 @@
 import torch
 from transformers import ViTModel, ViTFeatureExtractor, GPT2LMHeadModel, GPT2Tokenizer
 from config.config import Config
-from torchsummary import summary
 from torchvision import transforms
 
 class ImageCaptioningModel:
@@ -48,9 +47,8 @@ class ImageCaptioningModel:
     def save(self, path):
         """Save model to disk."""
         self.gpt2_model.save_pretrained(path)
-        self.tokenizer.save_pretrained(path)
 
     def load(self, path):
         """Load model from disk."""
         self.gpt2_model = GPT2LMHeadModel.from_pretrained(path).to(self.device)
-        self.tokenizer = GPT2Tokenizer.from_pretrained(path).to(self.device)
+        # return self.gpt2_model
