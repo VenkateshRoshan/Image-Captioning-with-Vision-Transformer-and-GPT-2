@@ -1,0 +1,66 @@
+name: Deploy Docker Image to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Log in to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    # 841162707028.dkr.ecr.us-east-1.amazonaws.com/image/caption-generator
+
+    - name: Build, tag, and push Docker image
+      run: |
+        docker build -t image/caption-generator .
+        docker tag mnist/gradio-app:latest 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
+        docker push 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
+
+    - name: Setup SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/private_key
+        chmod 600 ~/.ssh/private_key
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    # check via ssh if the key is working
+    - name: Check SSH Connection
+      run: |
+        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH Connection Established'"
+    
+    # # login to ECR on EC2 instance
+    # - name:
+    #   run: |
+    #     ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 841162707028.dkr.ecr.us-east-1.amazonaws.com"
+
+    # - name: Pull Docker image from ECR on EC2 instance
+    #   run: |
+    #     ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/mnist/gradio-app:latest"
+
+    # - name: Stop and remove existing Docker container on EC2
+    #   run: |
+    #     ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker stop gradio-app || true && docker rm gradio-app || true"
+
+    # - name: Run new Docker container on EC2
+    #   run: |
+    #     ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker run -d -p 7860:7860 --name gradio-app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/mnist/gradio-app:latest"
+
+    # - name: Verify Deployment
+    #   run: |
+    #     ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker ps | grep gradio-app"
