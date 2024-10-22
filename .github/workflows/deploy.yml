@@ -35,9 +35,9 @@ jobs:
     - name: Setup SSH Key
       run: |
         mkdir -p ~/.ssh
-        sudo echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/private_key
-        sudo chmod 600 ~/.ssh/private_key
-        sudo ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+        echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/private_key
+        chmod 600 ~/.ssh/private_key
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
     # check via ssh if the key is working
     - name: Check SSH Connection
