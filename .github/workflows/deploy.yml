@@ -26,18 +26,18 @@ jobs:
 
     # 841162707028.dkr.ecr.us-east-1.amazonaws.com/image/caption-generator
 
-    - name: Build, tag, and push Docker image
-      run: |
-        docker build -t image/caption-generator .
-        docker tag image/caption-generator:latest 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
-        docker push 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
+    # - name: Build, tag, and push Docker image
+    #   run: |
+    #     docker build -t image/caption-generator .
+    #     docker tag image/caption-generator:latest 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
+    #     docker push 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
 
     - name: Setup SSH Key
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/private_key
-        chmod 600 ~/.ssh/private_key
-        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+        sudo echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/private_key
+        sudo chmod 600 ~/.ssh/private_key
+        sudo ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
     # check via ssh if the key is working
     - name: Check SSH Connection
