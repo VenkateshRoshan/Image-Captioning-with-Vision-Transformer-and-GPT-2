@@ -71,24 +71,18 @@ jobs:
       run: |
         ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 841162707028.dkr.ecr.us-east-1.amazonaws.com"
 
+    - name: Pull Docker image from ECR on EC2 instance
+      run: |
+        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest"
 
-    # # login to ECR on EC2 instance
-    # - name:
-    #   run: |
-    #     ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 841162707028.dkr.ecr.us-east-1.amazonaws.com"
-      
-    # - name: Pull Docker image from ECR on EC2 instance
-    #   run: |
-    #     ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/mnist/gradio-app:latest"
+    - name: Stop and remove existing Docker container on EC2
+      run: |
+        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker stop gradio-app || true && docker rm gradio-app || true"
 
-    # - name: Stop and remove existing Docker container on EC2
-    #   run: |
-    #     ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker stop gradio-app || true && docker rm gradio-app || true"
+    - name: Run new Docker container on EC2
+      run: |
+        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker run -d -p 7860:7860 --name gradio-app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com//image/caption-generator:latest"
 
-    # - name: Run new Docker container on EC2
-    #   run: |
-    #     ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker run -d -p 7860:7860 --name gradio-app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/mnist/gradio-app:latest"
-
-    # - name: Verify Deployment
-    #   run: |
-    #     ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker ps | grep gradio-app"
+    - name: Verify Deployment
+      run: |
+        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker ps | grep gradio-app"
