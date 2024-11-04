@@ -55,9 +55,9 @@ jobs:
       run: |
         ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH Connection Established'"
     
-    - name: Instal aws cli on EC2 instance
-      run: |
-        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo apt-get update -y && curl 'https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip' -o "awscliv2.zip" && sudo apt-get install unzip -y && unzip awscliv2.zip && sudo ./aws/install && aws --version"
+    # - name: Instal aws cli on EC2 instance
+    #   run: |
+    #     ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo apt-get update -y && curl 'https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip' -o "awscliv2.zip" && sudo apt-get install unzip -y && unzip awscliv2.zip && sudo ./aws/install && aws --version"
     
     - name: Install Docker on EC2 instance
       run: |
@@ -66,7 +66,7 @@ jobs:
     - name: Configuring aws cli on EC2 instance
       run: |
         ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set region ${{ secrets.AWS_REGION }} && aws configure list"
-        
+
     - name: Login to ECR on EC2 instance
       run: |
         ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 841162707028.dkr.ecr.us-east-1.amazonaws.com"
