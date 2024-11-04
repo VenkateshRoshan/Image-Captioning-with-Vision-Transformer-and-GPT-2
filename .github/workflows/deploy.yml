@@ -32,13 +32,29 @@ jobs:
     #     docker tag image/caption-generator:latest 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
     #     docker push 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
 
-    - name: Setup SSH Key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_PRIVATE_KEY }}" | sed 's/\\n/\n/g' > ~/.ssh/private_key
-        chmod 600 ~/.ssh/private_key
-        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-        echo ~/.ssh/private_key
+    # - name: Setup SSH Key
+    #   run: |
+    #     mkdir -p ~/.ssh
+    #     echo "${{ secrets.EC2_PRIVATE_KEY }}" | sed 's/\\n/\n/g' > ~/.ssh/private_key
+    #     chmod 600 ~/.ssh/private_key
+    #     ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+    #     echo ~/.ssh/private_key
+
+    - name: Create .ssh Directory
+      run: mkdir -p ~/.ssh
+
+    - name: Write SSH Private Key to File
+      run: echo "${{ secrets.EC2_PRIVATE_KEY }}" | sed 's/\\n/\n/g' > ~/.ssh/private_key
+
+    - name: Set Permissions for SSH Private Key
+      run: chmod 600 ~/.ssh/private_key
+
+    - name: Add EC2 Host to known_hosts
+      run: ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Verify SSH Private Key Path
+      run: echo ~/.ssh/private_key
+
 
     # check via ssh if the key is working
     - name: Check SSH Connection
