@@ -26,11 +26,11 @@ jobs:
 
     # 841162707028.dkr.ecr.us-east-1.amazonaws.com/image/caption-generator
 
-    - name: Build, tag, and push Docker image
-      run: |
-        docker build -t image/caption-generator .
-        docker tag image/caption-generator:latest 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
-        docker push 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
+    # - name: Build, tag, and push Docker image
+    #   run: |
+    #     docker build -t image/caption-generator .
+    #     docker tag image/caption-generator:latest 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
+    #     docker push 841162707028.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/image/caption-generator:latest
 
     - name: Create .ssh Directory
       run: mkdir -p ~/.ssh
@@ -69,7 +69,7 @@ jobs:
 
     - name: Stop and remove existing Docker container on EC2
       run: |
-        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker stop gradio-app || true && docker rm image_caption_generator || true"
+        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker stop image_caption_generator || true && docker rm image_caption_generator || true"
 
     - name: Run new Docker container on EC2
       run: |
