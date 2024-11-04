@@ -77,7 +77,7 @@ jobs:
 
     - name: Stop and remove existing Docker container on EC2
       run: |
-        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker stop gradio-app || true && docker rm gradio-app || true"
+        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker stop gradio-app || true && docker rm image_caption_generator || true"
 
     - name: Run new Docker container on EC2
       run: |
@@ -85,4 +85,4 @@ jobs:
 
     - name: Verify Deployment
       run: |
-        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker ps | grep gradio-app"
+        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "docker ps | grep image_caption_generator"
