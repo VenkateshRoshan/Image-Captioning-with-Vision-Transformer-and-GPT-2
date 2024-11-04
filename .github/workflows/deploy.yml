@@ -61,7 +61,7 @@ jobs:
     
     - name: Install Docker on EC2 instance
       run: |
-        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo apt-get update -y && sudo apt-get install docker.io -y && sudo systemctl start docker && sudo systemctl enable docker && docker --version"
+        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo apt-get update -y && sudo apt-get install docker.io -y && sudo systemctl start docker && sudo systemctl enable docker && docker --version && sudo usermod -aG docker ${{ secrets.EC2_USER }}"
 
     - name: Configuring aws cli on EC2 instance
       run: |
