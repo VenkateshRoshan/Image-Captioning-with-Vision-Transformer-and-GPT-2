@@ -49,9 +49,6 @@ jobs:
     - name: Set Permissions for SSH Private Key
       run: chmod 600 ~/.ssh/private_key
 
-    - name: Add EC2 Host to known_hosts
-      run: ssh-keyscan -v -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-
 
     # check via ssh if the key is working
     - name: Check SSH Connection
