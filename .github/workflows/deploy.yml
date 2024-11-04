@@ -55,6 +55,9 @@ jobs:
       run: |
         ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH Connection Established'"
     
+    - name: Instal aws cli on EC2 instance
+      run: |
+        ssh -i ~/.ssh/private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "sudo apt-get update && sudo apt install -y awscli"
 
     - name: Login to ECR on EC2 instance
       run: |
